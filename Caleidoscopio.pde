@@ -11,6 +11,9 @@
  * La parte de calidoscopio es de
  * 2018-12-8 Jose G Moya Y
  */
+  /* 
+  * https://github.com/jgmy/caleidoscopio-JG.git
+  */
 import android.os.Environment.*;
 import ketai.camera.*;
 
@@ -43,10 +46,15 @@ void setup() {
  
   px=cam.width/2;
   py=cam.height/2;
+  /* Setup a buffer to create the triangle mask */
   mskbuff=createGraphics(imagen.width,imagen.height);
   makemask(mskbuff);
+  /* We can't use PGraphics as mask,
+   * we need to use a PImage instead
+  */
   msk=createImage(mskbuff.width,mskbuff.height,ARGB);
   msk=mskbuff.get(0,0,msk.width,msk.height);
+  
   imageMode(CENTER);
   
 }
@@ -93,7 +101,12 @@ void draw() {
   else
   {
     background(128);
+    textSize(displayDensity*50);
+    text ("Caleidoscopio de JG" , width/2, height/2-displayDensity*50);
+    textSize(displayDensity*25);
     text("Camera is currently off.", width/2, height/2);
+    text("See the source at",width/2, 3*height/4);
+    text("https://github.com/jgmy/caleidoscopio-JG.git",width/2, 3*height/4+displayDensity*25);
   }
   image(miniPh,width-100,height/2);
   drawUI();
