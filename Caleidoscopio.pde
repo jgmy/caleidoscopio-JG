@@ -16,7 +16,10 @@
   */
 import android.os.Environment.*;
 import ketai.camera.*;
-
+import android.media.*;
+import android.util.Log;
+import android.net.Uri;
+private static final String TAG = "com.josemoya.blogspot.com.caleidoscopio";
 KetaiCamera cam;
 
 /* 
@@ -210,6 +213,23 @@ void capture(){
       Ph.save(salida);
       miniPh=Ph.get();
       miniPh.resize(100,100);
+      
+      /* Agregar la foto a la galería */
+      MediaScannerConnection.scanFile(
+        getContext(), 
+        new String[] { 
+            salida 
+          }, 
+          null, 
+          new MediaScannerConnection.OnScanCompletedListener() 
+          { 
+            @Override public void onScanCompleted(String path, Uri uri)
+              { 
+               Log.i(TAG, "Scanned " + path); 
+               } 
+          
+          }
+        );
      
 }
 void managewritepermission(boolean granted){
