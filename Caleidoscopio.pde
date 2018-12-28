@@ -2,7 +2,7 @@
  * Caleidoscopio
  * La parte de la cámara y el GUI
  * se basan en el ejemplo
- * "CameraGettingStarted" de la
+ * "CameraGettingted" de la
  * biblioteca Ketai.
  * Parts from 
  *    Ketai Sensor Library for Android:
@@ -22,6 +22,10 @@ import android.net.Uri;
 private static final String TAG = "com.josemoya.blogspot.com.caleidoscopio";
 KetaiCamera cam;
 
+final int HEXAGON=1;
+final int HEXSTAR=2;
+final int MEGAHEX=3;
+int shapeType=MEGAHEX;
 /* 
  * this changes to CANT SAVE if no
  * permission is granted:
@@ -45,7 +49,7 @@ void setup() {
     min(cam.height,cam.width),
     ARGB
     );
-    miniPh=createImage(100,100,ARGB);
+    miniPh=createImage(min(height/4,width/4),min(height/4,width/4),ARGB);
  
   px=cam.width/2;
   py=cam.height/2;
@@ -63,6 +67,7 @@ void setup() {
 }
 
 void draw() {
+//float absurd=0.01*((frameCount %300)-150);
 
   /* camera active? */
   if (cam != null && cam.isStarted()){
@@ -87,19 +92,50 @@ void draw() {
      * 3 mirrored-rotated images
      */
       for (int f=0;f<6;f++){
-     
-      pushMatrix();
-      /* move to center*/
-      translate(width/2,height/2);
-      /* mirror even images*/
-      if (f%2==0) scale(1,-1);
-      /* rotate image */
-      rotate(f*2*PI/3);
-      /* move away from center half radius*/
-      translate(0,imagen.height/2);
-      image(imagen,0,0);
-      popMatrix();
+        pushMatrix();
+        /* move to center*/
+        translate(width/2,height/2);
+        /* mirror even images*/
+        if (f%2==0) scale(1,-1);
+        /* rotate image */
+        rotate(f*2*PI/3);
+        pushMatrix();
+        /* move away from center half radius*/
+        translate(0,imagen.height/2);
+        image(imagen,0,0);
+        if (shapeType==HEXSTAR||shapeType==MEGAHEX){
+           /* and now another */
+           /* same angle, opposite side*/
+           translate(0,-1.5*imagen.height);
+           image(imagen,0,0);
+           
+        }
+        
+        popMatrix();
+        popMatrix();
       }
+      if (shapeType==MEGAHEX){
+        for (int f=0;f<6;f++){
+          pushMatrix();
+          /* move to center*/
+          translate(width/2,height/2);
+          /* mirror even images*/
+          if (f%2==0) scale(1,-1);
+             /* rotate image */
+             rotate(f*2*PI/3);
+             pushMatrix();
+             /* sin( pi/3 ) to get apothem */
+             translate(sin(PI/3)*1.5*imagen.height,-0.25*imagen.height);
+             image(imagen,0,0);
+             popMatrix();
+             pushMatrix();
+             translate(-sin(PI/3)*1.5*imagen.height,-0.25*imagen.height);
+             image(imagen,0,0);
+             popMatrix();
+             popMatrix();
+         }
+         //text(nf(absurd,3,3),200,200);
+        }
   }
   else
   {
@@ -111,7 +147,7 @@ void draw() {
     text("See the source at",width/2, 3*height/4);
     text("https://github.com/jgmy/caleidoscopio-JG.git",width/2, 3*height/4+displayDensity*25);
   }
-  image(miniPh,width-100,height/2);
+  image(miniPh,width-miniPh.width,height/2);
   drawUI();
 }
 
@@ -147,25 +183,20 @@ void capture(){
     return;
   }
   /* imagen is a frame from camera */
-//    imagen=cam.get(
-//      max(0,px-imagen.width/2),
-//      max(0,py-imagen.height/2),
-//      imagen.width,
-//      imagen.height
-//      );
-//    
-//    /* mask image with a triangle shape */
-//    imagen.mask(msk);
-    
-    //image(imagen,width/2,height/2);
-    //image(msk,width/2,height/2);
       noFill();
       stroke(255,255,255);
       strokeWeight(5);
       rectMode(CORNERS);
       rect(0,0,width,height);
-     
-    Ph=createGraphics(imagen.width*2,imagen.height*2);
+    switch (shapeType){
+      case MEGAHEX:
+      case HEXSTAR:
+        Ph=createGraphics(imagen.width*4,imagen.height*4);
+        break;
+      case HEXAGON:
+      default:
+        Ph=createGraphics(imagen.width*2,imagen.height*2);
+    }
     Ph.beginDraw();
     Ph.imageMode(CENTER);
     Ph.background(0,0,0,0);
@@ -174,19 +205,46 @@ void capture(){
      * 3 mirrored-rotated images
      */
       for (int f=0;f<6;f++){
+        Ph.pushMatrix();
+        /* move to center*/
+        Ph.translate(Ph.width/2,Ph.height/2);
+        /* mirror even images*/
+        if (f%2==0) Ph.scale(1,-1);
+        /* rotate image */
+        Ph.rotate(f*2*PI/3);
+        /* move away from center half radius*/
+        Ph.translate(0,imagen.height/2);
+        Ph.image(imagen,0,0);
+        if (shapeType==HEXSTAR||shapeType==MEGAHEX){
+           /* and now another */
+           /* same angle, opposite side*/
+           Ph.translate(0,-1.5*imagen.height);
+           Ph.image(imagen,0,0);
+           
+        }
      
-      Ph.pushMatrix();
-      /* move to center*/
-      Ph.translate(Ph.width/2,Ph.height/2);
-      /* mirror even images*/
-      if (f%2==0) Ph.scale(1,-1);
-      /* rotate image */
-      Ph.rotate(f*2*PI/3);
-      /* move away from center half radius*/
-      Ph.translate(0,imagen.height/2);
-      Ph.image(imagen,0,0);
-      Ph.popMatrix();
-      
+        Ph.popMatrix();
+      }
+      if (shapeType==MEGAHEX){
+        for (int f=0;f<6;f++){
+          Ph.pushMatrix();
+          /* move to center */
+          Ph.translate(Ph.width/2,Ph.height/2);
+          /* mirror even images*/
+          if (f%2==0) scale(1,-1);
+          /* rotate image */
+          Ph.rotate(f*2*PI/3);
+          Ph.pushMatrix();
+          /* sin( pi/3 ) to get apothem */
+          Ph.translate(sin(PI/3)*1.5*imagen.height,-0.25*imagen.height);
+          Ph.image(imagen,0,0);
+          Ph.popMatrix();
+          Ph.pushMatrix();
+          Ph.translate(-sin(PI/3)*1.5*imagen.height,-0.25*imagen.height);
+          Ph.image(imagen,0,0);
+          Ph.popMatrix();
+          Ph.popMatrix();
+        }
       }
       String outfolder=
       "//storage/emulated/0/"+
@@ -212,7 +270,10 @@ void capture(){
       
       Ph.save(salida);
       miniPh=Ph.get();
-      miniPh.resize(100,100);
+      miniPh.resize(
+        min(height/4,width/4),
+        min(height/4,width/4)
+      );
       
       /* Agregar la foto a la galería */
       MediaScannerConnection.scanFile(
