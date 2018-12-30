@@ -21,7 +21,7 @@ import android.util.Log;
 import android.net.Uri;
 private static final String TAG = "com.josemoya.blogspot.com.caleidoscopio";
 KetaiCamera cam;
-
+PShape iconHex,iconStar,iconMega;
 final int HEXAGON=1;
 final int HEXSTAR=2;
 final int MEGAHEX=3;
@@ -43,6 +43,7 @@ void setup() {
   imageMode(CENTER);
   textAlign(CENTER, CENTER);
   textSize(displayDensity * 25);
+  
   cam = new KetaiCamera(this, 1280, 720, 24);
   imagen=createImage(
     min(cam.height,cam.width),
@@ -63,6 +64,7 @@ void setup() {
   msk=mskbuff.get(0,0,msk.width,msk.height);
   
   imageMode(CENTER);
+  
   
 }
 
@@ -334,10 +336,20 @@ void mousePressed()
     else
       cam.enableFlash();
   }
+  float rd=min(min(100,width/8), height/4);
+  if (mouseX<rd){
+    for (int f=1;f<4;f++){
+      if (dist(mouseX,mouseY,rd,float(f)*height/4)<rd){
+        shapeType=f;
+        break;
+      }
+    }
+  }
 }
 
 void drawUI()
 {
+  
   pushStyle();
   textAlign(LEFT);
   fill(0);
@@ -368,4 +380,59 @@ void drawUI()
     text("Flash On", width/4*3 + 5, 80); 
 
   popStyle();
+  drawShapeIcon();
+}
+void drawShapeIcon(){
+  float rd, cx,cy;
+  pushStyle();
+  noFill();
+  stroke(shapeType==HEXAGON ? 255:200);
+  strokeWeight(shapeType==HEXAGON ? 3:1);
+  rd=min(min(100,width/8), height/4);
+  cx=rd+1;
+  cy=height/4;
+  for (float f=0;f<6;f++){
+    line(
+      cx+rd*cos(f*PI/3),cy+rd*sin(f*PI/3),
+      cx+rd*cos((f+1)*PI/3),cy+rd*sin((f+1)*PI/3)
+    );
+    line(
+      cx+rd*cos(f*PI/3),cy+rd*sin(f*PI/3),
+      cx+rd*cos((f+3)*PI/3),cy+rd*sin((f+3)*PI/3)
+    );
+  }
+  stroke(shapeType==HEXSTAR ? 255:200);
+  strokeWeight(shapeType==HEXSTAR ? 3:1);
+  cy=2*height/4;
+  for (float f=0;f<6;f++){
+    line(
+      cx+rd*cos(f*PI/3),cy+rd*sin(f*PI/3),
+      cx+rd*cos((f+2)*PI/3),cy+rd*sin((f+2)*PI/3)
+    );
+    line(
+      cx+rd*cos((f+0.5)*PI/3)/2,cy+rd*sin((f+0.5)*PI/3)/2,
+      cx+rd*cos((f+3.5)*PI/3)/2,cy+rd*sin((f+3.5)*PI/3)/2
+    );
+  }
+  stroke(shapeType==MEGAHEX ? 255:200);
+  strokeWeight(shapeType==MEGAHEX ? 3:1);
+  cy=3*height/4;
+  float c3=rd*4*sin(PI/3)/3;
+  for (float f=0;f<6;f++){
+    line(
+      cx+c3*cos((f+0.5)*PI/3),cy+c3*sin((f+0.5)*PI/3),
+      cx+c3*cos((f+1.5)*PI/3),cy+c3*sin((f+1.5)*PI/3)
+    );
+    line(
+      cx+c3*cos((f+0.5)*PI/3),cy+c3*sin((f+0.5)*PI/3),
+      cx+c3*cos((f+3.5)*PI/3),cy+c3*sin((f+3.5)*PI/3)
+    );
+    line(
+      cx+rd*cos(f*PI/3),cy+rd*sin(f*PI/3),
+      cx+rd*cos((f+2)*PI/3),cy+rd*sin((f+2)*PI/3)
+    );
+    
+  }
+  popStyle();
+  
 }
