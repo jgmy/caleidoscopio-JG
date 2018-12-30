@@ -116,23 +116,23 @@ void draw() {
       }
       if (shapeType==MEGAHEX){
         for (int f=0;f<6;f++){
-          pushMatrix();
-          /* move to center*/
-          translate(width/2,height/2);
-          /* mirror even images*/
-          if (f%2==0) scale(1,-1);
-             /* rotate image */
-             rotate(f*2*PI/3);
-             pushMatrix();
-             /* sin( pi/3 ) to get apothem */
-             translate(sin(PI/3)*1.5*imagen.height,-0.25*imagen.height);
-             image(imagen,0,0);
-             popMatrix();
-             pushMatrix();
-             translate(-sin(PI/3)*1.5*imagen.height,-0.25*imagen.height);
-             image(imagen,0,0);
-             popMatrix();
-             popMatrix();
+         pushMatrix();
+         /* move to center*/
+         translate(width/2,height/2);
+         /* mirror even images*/
+         if (f%2==0) scale(1,-1);
+         /* rotate image */
+         rotate(f*2*PI/3);
+         pushMatrix();
+         /* sin( pi/3 ) to get apothem */
+         translate(sin(PI/3)*1.5*imagen.height,-0.25*imagen.height);
+         image(imagen,0,0);
+         popMatrix();
+         pushMatrix();
+         translate(-sin(PI/3)*1.5*imagen.height,-0.25*imagen.height);
+         image(imagen,0,0);
+         popMatrix();
+         popMatrix();
          }
          //text(nf(absurd,3,3),200,200);
         }
@@ -231,9 +231,10 @@ void capture(){
           /* move to center */
           Ph.translate(Ph.width/2,Ph.height/2);
           /* mirror even images*/
-          if (f%2==0) scale(1,-1);
+          if (f%2==0) Ph.scale(1,-1);
           /* rotate image */
           Ph.rotate(f*2*PI/3);
+          
           Ph.pushMatrix();
           /* sin( pi/3 ) to get apothem */
           Ph.translate(sin(PI/3)*1.5*imagen.height,-0.25*imagen.height);
@@ -245,6 +246,7 @@ void capture(){
           Ph.popMatrix();
           Ph.popMatrix();
         }
+          
       }
       String outfolder=
       "//storage/emulated/0/"+
