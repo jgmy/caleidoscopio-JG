@@ -34,7 +34,8 @@ String saveWord="Save";
 
 PImage imagen,imagen2,msk;
 PImage miniPh;
-PGraphics mskbuff;
+
+PGraphics mskbuff,Pho;
 int px,py;
 void setup() {
   fullScreen();
@@ -149,7 +150,9 @@ void draw() {
     text("See the source at",width/2, 3*height/4);
     text("https://github.com/jgmy/caleidoscopio-JG.git",width/2, 3*height/4+displayDensity*25);
   }
+  /* draw last saved image */
   image(miniPh,width-miniPh.width,height/2);
+  /* draw user interface on top */
   drawUI();
 }
 
@@ -177,12 +180,24 @@ void draw() {
   
 }
 
+
+
+/* Creates a big image with transparent
+ * background we can save
+ */
 void capture(){
-  PGraphics Ph;
-  String salida;
+  
+  
   if ( (cam == null) || !cam.isStarted()){
     println("no camera - no photo");
     return;
+  }
+  /* Pho is a global object, we should
+   * dispose it before we cast
+   * createGraphics on it.
+   */
+  if (Pho!=null){
+    Pho.dispose();
   }
   /* imagen is a frame from camera */
       noFill();
@@ -190,116 +205,141 @@ void capture(){
       strokeWeight(5);
       rectMode(CORNERS);
       rect(0,0,width,height);
+      
     switch (shapeType){
       case MEGAHEX:
       case HEXSTAR:
-        Ph=createGraphics(imagen.width*4,imagen.height*4);
+        Pho=createGraphics(imagen.width*4,imagen.height*4);
         break;
       case HEXAGON:
       default:
-        Ph=createGraphics(imagen.width*2,imagen.height*2);
+        Pho=createGraphics(imagen.width*2,imagen.height*2);
     }
-    Ph.beginDraw();
-    Ph.imageMode(CENTER);
-    Ph.background(0,0,0,0);
+    Pho.beginDraw();
+    Pho.imageMode(CENTER);
+    Pho.background(0,0,0,0);
     /* 
      * 3 rotated images along with
      * 3 mirrored-rotated images
      */
       for (int f=0;f<6;f++){
-        Ph.pushMatrix();
+        Pho.pushMatrix();
         /* move to center*/
-        Ph.translate(Ph.width/2,Ph.height/2);
+        Pho.translate(Pho.width/2,Pho.height/2);
         /* mirror even images*/
-        if (f%2==0) Ph.scale(1,-1);
+        if (f%2==0) Pho.scale(1,-1);
         /* rotate image */
-        Ph.rotate(f*2*PI/3);
+        Pho.rotate(f*2*PI/3);
         /* move away from center half radius*/
-        Ph.translate(0,imagen.height/2);
-        Ph.image(imagen,0,0);
+        Pho.translate(0,imagen.height/2);
+        Pho.image(imagen,0,0);
         if (shapeType==HEXSTAR||shapeType==MEGAHEX){
            /* and now another */
            /* same angle, opposite side*/
-           Ph.translate(0,-1.5*imagen.height);
-           Ph.image(imagen,0,0);
+           Pho.translate(0,-1.5*imagen.height);
+           Pho.image(imagen,0,0);
            
         }
      
-        Ph.popMatrix();
+        Pho.popMatrix();
       }
       if (shapeType==MEGAHEX){
         for (int f=0;f<6;f++){
-          Ph.pushMatrix();
+          Pho.pushMatrix();
           /* move to center */
-          Ph.translate(Ph.width/2,Ph.height/2);
+          Pho.translate(Pho.width/2,Pho.height/2);
           /* mirror even images*/
-          if (f%2==0) Ph.scale(1,-1);
+          if (f%2==0) Pho.scale(1,-1);
           /* rotate image */
-          Ph.rotate(f*2*PI/3);
+          Pho.rotate(f*2*PI/3);
           
-          Ph.pushMatrix();
+          Pho.pushMatrix();
           /* sin( pi/3 ) to get apothem */
-          Ph.translate(sin(PI/3)*1.5*imagen.height,-0.25*imagen.height);
-          Ph.image(imagen,0,0);
-          Ph.popMatrix();
-          Ph.pushMatrix();
-          Ph.translate(-sin(PI/3)*1.5*imagen.height,-0.25*imagen.height);
-          Ph.image(imagen,0,0);
-          Ph.popMatrix();
-          Ph.popMatrix();
+          Pho.translate(sin(PI/3)*1.5*imagen.height,-0.25*imagen.height);
+          Pho.image(imagen,0,0);
+          Pho.popMatrix();
+          Pho.pushMatrix();
+          Pho.translate(-sin(PI/3)*1.5*imagen.height,-0.25*imagen.height);
+          Pho.image(imagen,0,0);
+          Pho.popMatrix();
+          Pho.popMatrix();
         }
           
       }
-      String outfolder=
+      
+      Pho.endDraw();
+      saveCapture();
+}
+
+/* Actual file routines have been moved here
+ * so we can retry saving after requesting 
+ * permissions.
+ * The main flaw is now we need a global
+ * Pho object, so we need to dispose of it
+ * on the beginning of capture()
+ */
+ 
+void saveCapture(){
+  String salida;
+  String outfolder=
       "//storage/emulated/0/"+
       android.os.Environment.DIRECTORY_DCIM;
-     ;
-      
-      println(outfolder);
-      
-      salida=outfolder+"/Caleidoscopio_"+
-             nf(year(),4)+
-             nf(month(),2)+
-             nf(day(),2)+"_"+
-             nf(hour(),2)+
-             nf(minute(),2)+
-             nf(second(),2)+"_"+
-             nf(millis(),6)+".png";
-             
-      Ph.endDraw();
-      if(! hasPermission("android.permission.WRITE_EXTERNAL_STORAGE"))
-      {
-        requestPermission("android.permission.WRITE_EXTERNAL_STORAGE", "managewritepermission");
-      }
-      
-      Ph.save(salida);
-      miniPh=Ph.get();
-      miniPh.resize(
-        min(height/4,width/4),
-        min(height/4,width/4)
-      );
-      
-      /* Agregar la foto a la galería */
-      MediaScannerConnection.scanFile(
-        getContext(), 
-        new String[] { 
-            salida 
-          }, 
-          null, 
-          new MediaScannerConnection.OnScanCompletedListener() 
-          { 
-            @Override public void onScanCompleted(String path, Uri uri)
-              { 
-               Log.i(TAG, "Scanned " + path); 
-               } 
-          
-          }
-        );
-     
+  println(outfolder);
+  salida=outfolder+"/Caleidoscopio_"+
+       nf(year(),4)+
+       nf(month(),2)+
+       nf(day(),2)+"_"+
+       nf(hour(),2)+
+       nf(minute(),2)+
+       nf(second(),2)+"_"+
+       nf(millis(),6)+".png";
+  println(salida);
+  println("checking write permission");
+  if(! hasPermission("android.permission.WRITE_EXTERNAL_STORAGE"))
+    {
+      println("requesting write permission");
+      requestPermission("android.permission.WRITE_EXTERNAL_STORAGE", "manageWritePermission");
+    }
+  println("writing");
+  Pho.save(salida);
+  println("mini-image");
+  miniPh=Pho.get();
+  miniPh.resize(
+    min(height/4,width/4),
+    min(height/4,width/4)
+  );
+    
+  println("adding to media gallery");
+  /* Agregar la foto a la galería */
+  MediaScannerConnection.scanFile
+  (
+    getContext(), 
+    new String[] { 
+        salida 
+    }, 
+    null, 
+    new MediaScannerConnection.OnScanCompletedListener() 
+    { 
+        @Override public void onScanCompleted(String path, Uri uri)
+        { 
+           Log.i(TAG, "Scanned " + path); 
+         } 
+        
+     }
+   );
+   
 }
-void managewritepermission(boolean granted){
-  if(!granted) saveWord="CAN'T SAVE";
+
+/* Callback function after requesting
+ * write permission
+ */
+void manageWritePermission(boolean granted){
+  if(!granted)
+    saveWord="CAN'T SAVE";
+  else
+    saveCapture();
 }
+
 
 void onCameraPreviewEvent()
 {
@@ -382,6 +422,13 @@ void drawUI()
   popStyle();
   drawShapeIcon();
 }
+
+/* Draws rhe buttons at left. 
+ * I could change for shapes  but I
+ * Don't know how to make
+ * shapes made of crossing lines
+ * instead of polygons
+ */
 void drawShapeIcon(){
   float rd, cx,cy;
   pushStyle();
