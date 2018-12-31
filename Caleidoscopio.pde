@@ -369,12 +369,16 @@ void mousePressed()
     capture();
   }
   //Toggle Camera Flash
+  // to use flash with ketai,
+  // we require a started camera.
+  // Also, using flash with front
+  // camera can crash the app.
   if (mouseX > 3*width/4 && mouseY < 100)
   {
     if (cam.isFlashEnabled())
       cam.disableFlash();
     else
-      cam.enableFlash();
+      if (cam.isStarted()) cam.enableFlash();
   }
   float rd=min(min(100,width/8), height/4);
   if (mouseX<rd){
@@ -414,9 +418,9 @@ void drawUI()
     text("Switch Camera", width/4 + 5, 80);
   }
   
-  if (cam.isFlashEnabled())
+  if ( cam.isFlashEnabled())
     text("Flash Off", width/4*3 + 5, 80); 
-  else
+  else if (cam.isStarted())
     text("Flash On", width/4*3 + 5, 80); 
 
   popStyle();
