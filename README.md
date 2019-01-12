@@ -31,7 +31,8 @@ The app does not send data over the network. We don't get your data.
 
 ## Changelog
 
-* 2018-12-31: V 2.4 (code 4) "Silvestre." Fixed bug with Flash and bug on first save. Added 2 different modes with 12 and 36 mirrors.
+* 2019-01-12: V. 2.3 (code 6) "Bonito". Fixed bug with permissions. The bug was there at least from Jan, 6.
+* 2018-12-31: V 2.2 (code 4) "Silvestre." Fixed bug with Flash and bug on first save. Added 2 different modes with 12 and 36 mirrors.
 
 * 2018-12-24: This app now updates the gallery after saving a photo.
 
