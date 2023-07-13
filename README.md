@@ -1,5 +1,6 @@
 # caleidoscopio-JG
 A camera kaleidoscope made with processing.
+* youtube demo: https://www.youtube.com/watch?v=yDvoi9dt1-o
 
 ## Library Requirements
 You need Ketai to compile this app.
